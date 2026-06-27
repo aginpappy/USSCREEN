@@ -1,0 +1,45 @@
+name: US Breakout Screener
+
+# Runs automatically on a schedule, and can also be triggered manually from
+# the "Actions" tab in GitHub (the "Run workflow" button) for testing.
+#
+# Cron times are in UTC. 21:30 UTC is 5:30pm ET during EDT (summer) or
+# 4:30pm ET during EST (winter) - safely after the US market's 4:00pm ET
+# close in both cases, without needing to change the cron twice a year.
+# Adjust the line below if you want a different schedule.
+on:
+  schedule:
+    - cron: "30 21 * * 1-5"   # weekdays, 21:30 UTC
+  workflow_dispatch: {}        # manual "Run workflow" button
+
+permissions:
+  contents: write   # needed so the job can commit results back to the repo
+
+jobs:
+  run-screener:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run screener
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python us_screener.py
+
+      - name: Commit updated results
+        run: |
+          git config user.name "screener-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add screener_results.csv docs/results.json
+          git diff --quiet --cached || git commit -m "Update screener results [skip ci]"
+          git push
