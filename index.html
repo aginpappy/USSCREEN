@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breakout Screener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#11151a;
+    --panel:#171c23;
+    --border:#272f3a;
+    --text:#e7e9ec;
+    --muted:#8b95a1;
+    --green:#34d399;
+    --green-dim:#1f8f66;
+    --red:#f2545b;
+    --cyan:#38bdf8;
+    --violet:#a78bfa;
+    --amber:#fbbf24;
+    --dot-off:#313a46;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  a{color:var(--cyan);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+
+  header{display:flex;flex-direction:column;gap:4px;margin-bottom:22px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--cyan);text-transform:uppercase;}
+  h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-0.01em;}
+  .subtitle{color:var(--muted);font-size:13px;}
+
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin:22px 0 26px;}
+  .stat{
+    background:var(--panel);border:1px solid var(--border);border-radius:3px;
+    padding:14px 18px;min-width:130px;flex:1;border-left:3px solid var(--border);
+  }
+  .stat.cyan{border-left-color:var(--cyan);}
+  .stat.green{border-left-color:var(--green);}
+  .stat.violet{border-left-color:var(--violet);}
+  .stat .num{font-family:var(--mono);font-size:28px;font-weight:600;line-height:1;}
+  .stat .num.cyan{color:var(--cyan);}
+  .stat .num.green{color:var(--green);}
+  .stat .num.violet{color:var(--violet);}
+  .stat .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;}
+
+  .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap;}
+  .controls-left{display:flex;align-items:center;gap:10px;}
+  #search{
+    background:var(--panel);border:1px solid var(--border);color:var(--text);
+    font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:3px;width:220px;
+  }
+  #search:focus{outline:1px solid var(--cyan);}
+  .btn-run{
+    font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cyan);
+    border:1px solid var(--cyan);border-radius:3px;padding:8px 12px;text-decoration:none;
+    white-space:nowrap;transition:background .15s ease;
+  }
+  .btn-run:hover{background:rgba(56,189,248,0.12);}
+  .legend{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+  .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:3px;}
+  table{border-collapse:collapse;width:100%;font-size:12px;}
+  thead th{
+    position:sticky;top:0;background:#1c222a;border-bottom:1px solid var(--border);
+    color:var(--muted);font-weight:500;text-align:center;padding:8px 6px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.03em;white-space:nowrap;cursor:default;
+  }
+  thead th.sym-col, thead th.num-col{text-align:left;}
+  thead th[title]{cursor:help;}
+  tbody td{padding:7px 6px;border-bottom:1px solid var(--border);text-align:center;font-family:var(--mono);white-space:nowrap;}
+  tbody tr:hover{background:#1b2129;}
+  tbody tr.passed{box-shadow:inset 3px 0 0 var(--green);}
+  td.sym{text-align:left;font-weight:600;}
+  tr.passed td.sym{color:var(--green);}
+  td.num{text-align:right;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--dot-off);}
+  .dot.on.tech{background:var(--cyan);}
+  .dot.on.fund{background:var(--violet);}
+  .score{font-weight:600;color:var(--muted);}
+  .score.full{color:var(--green);}
+  .score.near{color:var(--amber);}
+
+  footer{margin-top:24px;color:var(--muted);font-size:11px;line-height:1.6;}
+  .empty{padding:40px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">16-rule US equity breakout scan</div>
+    <h1>Breakout Screener</h1>
+    <div class="subtitle" id="subtitle">Loading latest run&hellip;</div>
+  </header>
+
+  <div class="stats">
+    <div class="stat cyan"><div class="num cyan" id="stat-evaluated">&ndash;</div><div class="label">Evaluated</div></div>
+    <div class="stat green"><div class="num green" id="stat-passed">&ndash;</div><div class="label">Passed all 16</div></div>
+    <div class="stat violet"><div class="num violet" id="stat-universe">&ndash;</div><div class="label">Symbol universe</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="controls-left">
+      <input id="search" type="text" placeholder="Filter symbol&hellip;" autocomplete="off">
+      <a id="run-now" class="btn-run" href="#" target="_blank" rel="noopener">Run now &#8599;</a>
+    </div>
+    <div class="legend">
+      <span class="dot on tech"></span> technical rule passed
+      <span class="dot on fund"></span> fundamental rule passed
+      <span class="dot"></span> rule failed
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table id="results-table">
+      <thead><tr id="head-row"></tr></thead>
+      <tbody id="body"><tr><td class="empty">Loading&hellip;</td></tr></tbody>
+    </table>
+  </div>
+
+  <footer>
+    Price/volume/MACD/ATR from Yahoo Finance via yfinance. ROE / ROCE / Net Sales / Net Profit / Operating Margin
+    from SEC EDGAR filings (data.sec.gov). Rule 1 uses the last fully completed week; rule 10 needs an after-close run
+    for a clean volume comparison. <span id="generated"></span>
+  </footer>
+</div>
+
+<script>
+// EDIT THIS - your GitHub "username/repo-name", used only to build the link
+// to the Actions page for the manual "Run Now" button below.
+const REPO = "yourusername/your-repo-name";
+
+const RULE_LABELS = {
+  rule_1_weekly_close_gt_weekly_sma20: "1. Weekly close > 20w SMA",
+  rule_2_tight_range_high: "2. Tight range (high)",
+  rule_3_tight_range_low: "3. Tight range (low)",
+  rule_4_new_10d_closing_high: "4. New 10d closing high",
+  rule_5_breakout_ge_5pct: "5. Breakout \u2265 5%",
+  rule_6_breakout_le_20pct: "6. Breakout \u2264 20%",
+  rule_7_strong_close_small_wick: "7. Strong close, small wick",
+  rule_8_macd_line_gt_signal: "8. MACD line > signal",
+  rule_9_recent_macd_cross: "9. Recent MACD cross (15d)",
+  "rule_10_volume_surge_1.3x": "10. Volume \u2265 1.3x prior day",
+  rule_11_roe_ge_10pct: "11. ROE \u2265 10%",
+  rule_12_roce_ge_10pct: "12. ROCE \u2265 10%",
+  rule_13_net_sales_gt_0: "13. Net sales (qtr) > 0",
+  rule_14_net_profit_gt_0: "14. Net profit (qtr) > 0",
+  rule_15_operating_margin_ge_10pct: "15. Operating margin \u2265 10%",
+  rule_16_atr_pct_le_8: "16. ATR / close \u2264 8%",
+};
+
+const FUND_RULES = new Set([
+  "rule_11_roe_ge_10pct",
+  "rule_12_roce_ge_10pct",
+  "rule_13_net_sales_gt_0",
+  "rule_14_net_profit_gt_0",
+  "rule_15_operating_margin_ge_10pct",
+]);
+
+let ALL_ROWS = [];
+let RULE_COLS = [];
+
+function fmt(n, suffix) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "\u2013";
+  return (suffix ? n.toFixed(1) + suffix : n);
+}
+
+function buildHead() {
+  const headRow = document.getElementById('head-row');
+  let html = '<th class="sym-col">Symbol</th><th class="num-col">Close</th>';
+  RULE_COLS.forEach((col, i) => {
+    html += `<th title="${RULE_LABELS[col] || col}">${i + 1}</th>`;
+  });
+  html += '<th>Score</th><th class="num-col">ROE%</th><th class="num-col">ROCE%</th><th class="num-col">OpMgn%</th><th class="num-col">ATR%</th><th class="num-col">Stop -10%</th><th class="num-col">SMA10 Exit</th>';
+  headRow.innerHTML = html;
+}
+
+function rowHtml(row) {
+  const cls = row.passed ? 'passed' : '';
+  let html = `<tr class="${cls}"><td class="sym">${row.symbol}</td><td class="num">${fmt(row.close)}</td>`;
+  RULE_COLS.forEach(col => {
+    const onCls = row[col] ? `on ${FUND_RULES.has(col) ? 'fund' : 'tech'}` : '';
+    html += `<td><span class="dot ${onCls}"></span></td>`;
+  });
+  const score = row.rules_passed_count ?? RULE_COLS.filter(c => row[c]).length;
+  const total = RULE_COLS.length;
+  const scoreCls = score === total ? 'full' : (score >= total - 3 ? 'near' : '');
+  html += `<td class="score ${scoreCls}">${score}/${total}</td>`;
+  html += `<td class="num">${fmt(row.roe_pct)}</td><td class="num">${fmt(row.roce_pct)}</td>`;
+  html += `<td class="num">${fmt(row.operating_margin_pct)}</td><td class="num">${fmt(row.atr_pct_of_close)}</td>`;
+  html += `<td class="num">${fmt(row.stop_loss_10pct)}</td>`;
+  const smaWarn = row.sma10_already_broken ? ' style="color:var(--red);"' : '';
+  html += `<td class="num"${smaWarn}>${fmt(row.sma10_exit_level)}${row.sma10_already_broken ? ' \u26a0' : ''}</td></tr>`;
+  return html;
+}
+
+function render(rows) {
+  const body = document.getElementById('body');
+  if (!rows.length) {
+    body.innerHTML = '<tr><td class="empty" colspan="99">No symbols match.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(rowHtml).join('');
+}
+
+async function init() {
+  const runBtn = document.getElementById('run-now');
+  runBtn.href = `https://github.com/${REPO}/actions/workflows/screener.yml`;
+  runBtn.title = REPO === "yourusername/your-repo-name"
+    ? "Edit the REPO constant near the top of this file's <script> first"
+    : "Opens GitHub Actions - click \"Run workflow\" there to start a fresh run now";
+
+  let data;
+  try {
+    const resp = await fetch('results.json', { cache: 'no-store' });
+    data = await resp.json();
+  } catch (e) {
+    document.getElementById('subtitle').textContent = 'Could not load results.json yet - run the screener at least once.';
+    document.getElementById('body').innerHTML = '<tr><td class="empty" colspan="99">No data yet.</td></tr>';
+    return;
+  }
+
+  RULE_COLS = data.rule_columns || [];
+  ALL_ROWS = data.rows || [];
+
+  document.getElementById('stat-evaluated').textContent = data.total_evaluated ?? '\u2013';
+  document.getElementById('stat-passed').textContent = data.total_passed ?? '\u2013';
+  document.getElementById('stat-universe').textContent = data.total_symbols ?? '\u2013';
+
+  const gen = data.generated_at ? new Date(data.generated_at) : null;
+  document.getElementById('subtitle').textContent = gen
+    ? `Last run: ${gen.toLocaleString()}`
+    : 'Last run: unknown';
+  document.getElementById('generated').textContent = gen ? `Generated ${gen.toISOString()}.` : '';
+
+  buildHead();
+  render(ALL_ROWS);
+
+  document.getElementById('search').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toUpperCase();
+    render(q ? ALL_ROWS.filter(r => r.symbol.toUpperCase().includes(q)) : ALL_ROWS);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
