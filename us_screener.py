@@ -10,8 +10,9 @@ WHAT IT CHECKS (translated 1:1 from the original filter list, minus the
 Market Cap rule - dropped since symbols.txt is already a vetted universe)
 ---------------------------------------------------------------
  1. Last completed week's Close  >  20-week SMA of weekly Close
- 2. Today's High   <=  max High of the PRIOR 6 days (tight range, no new high)
- 3. Today's Low    >=  min Low  of the PRIOR 6 days (tight range, no new low)
+ 2. Today's Low has pulled back >= 3% below the prior 10-day swing High
+    (a real retracement, not just "no new high")
+ 3. ...but no more than 15% below it (a healthy pullback, not a breakdown)
  4. Today's Close  ==  max Close of the last 10 days (fresh 10-day closing high)
  5. Close >= 1.05 * yesterday's Close   (breakout move, at least +5%)
  6. Close <= 1.20 * yesterday's Close   (not a blow-off, at most +20%)
@@ -89,8 +90,10 @@ FUNDAMENTALS_PAUSE_SECONDS = 0.2  # seconds between SEC EDGAR lookups (SEC asks 
 OUTPUT_CSV = "screener_results.csv"
 OUTPUT_JSON = "docs/results.json"  # consumed by the GitHub Pages dashboard
 
-CONSOLIDATION_WINDOW = 6          # rules 2-3: tight-range lookback (days, excl. today)
-BREAKOUT_WINDOW = 10              # rule 4: new closing-high lookback (days, incl. today)
+BREAKOUT_WINDOW = 10              # rule 4: new closing-high lookback (days, incl. today);
+                                  # also the swing-high used to measure the pullback for rules 2-3
+MIN_PULLBACK_PCT = 3.0            # rule 2: must have retraced at least this far below the recent high (%)
+MAX_PULLBACK_PCT = 15.0           # rule 3: but not further than this - a real pullback, not a breakdown (%)
 MIN_BREAKOUT_PCT = 1.05           # rule 5
 MAX_BREAKOUT_PCT = 1.20           # rule 6
 MAX_UPPER_WICK_RATIO = 0.50       # rule 7
@@ -128,9 +131,9 @@ def evaluate_price_rules(df):
         return None  # not enough weekly bars for the 20-week SMA
     weekly_sma20 = sma(weekly["Close"], 20)
 
-    # rules 2-3: tight range over the PRIOR N days, excluding today
-    prior_high_max = high.shift(1).rolling(CONSOLIDATION_WINDOW).max()
-    prior_low_min = low.shift(1).rolling(CONSOLIDATION_WINDOW).min()
+    # rules 2-3: how far has price actually retraced from the recent swing
+    # high (the same N-day high that rule 4 needs to break above)?
+    swing_high = high.shift(1).rolling(BREAKOUT_WINDOW).max()
     # rule 4: fresh closing high including today
     close_max_n = close.rolling(BREAKOUT_WINDOW).max()
 
@@ -150,8 +153,10 @@ def evaluate_price_rules(df):
         # still-forming current week by using the row before it)
         r1 = bool(weekly["Close"].iloc[-2] > weekly_sma20.iloc[-2])
 
-        r2 = bool(h0 <= prior_high_max.iloc[-1])
-        r3 = bool(low.iloc[-1] >= prior_low_min.iloc[-1])
+        swing_high_val = swing_high.iloc[-1]
+        pullback_pct = float((swing_high_val - low.iloc[-1]) / swing_high_val * 100) if swing_high_val else float("nan")
+        r2 = bool(pullback_pct >= MIN_PULLBACK_PCT)
+        r3 = bool(pullback_pct <= MAX_PULLBACK_PCT)
         r4 = bool(c0 == close_max_n.iloc[-1])
         r5 = bool(c0 >= MIN_BREAKOUT_PCT * c_prev)
         r6 = bool(c0 <= MAX_BREAKOUT_PCT * c_prev)
@@ -191,8 +196,8 @@ def evaluate_price_rules(df):
     return {
         "close": round(float(c0), 2),
         "rule_1_weekly_close_gt_weekly_sma20": r1,
-        "rule_2_tight_range_high": r2,
-        "rule_3_tight_range_low": r3,
+        "rule_2_pullback_ge_3pct": r2,
+        "rule_3_pullback_le_15pct": r3,
         "rule_4_new_10d_closing_high": r4,
         "rule_5_breakout_ge_5pct": r5,
         "rule_6_breakout_le_20pct": r6,
@@ -201,6 +206,7 @@ def evaluate_price_rules(df):
         "rule_9_recent_macd_cross": r9,
         "rule_10_volume_surge_1.3x": r10,
         "rule_16_atr_pct_le_8": r16,
+        "pullback_pct": round(pullback_pct, 1) if pullback_pct == pullback_pct else None,
         "atr_pct_of_close": round(atr_pct, 2),
         "stop_loss_10pct": stop_loss_10pct,
         "sma10_exit_level": sma10_value,
@@ -313,8 +319,8 @@ def run_screener(symbols):
 
 RULE_COLUMNS = [
     "rule_1_weekly_close_gt_weekly_sma20",
-    "rule_2_tight_range_high",
-    "rule_3_tight_range_low",
+    "rule_2_pullback_ge_3pct",
+    "rule_3_pullback_le_15pct",
     "rule_4_new_10d_closing_high",
     "rule_5_breakout_ge_5pct",
     "rule_6_breakout_le_20pct",

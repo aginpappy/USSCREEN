@@ -153,8 +153,8 @@ const REPO = "aginpappy/USSCREEN";
 
 const RULE_LABELS = {
   rule_1_weekly_close_gt_weekly_sma20: "1. Weekly close > 20w SMA",
-  rule_2_tight_range_high: "2. Tight range (high)",
-  rule_3_tight_range_low: "3. Tight range (low)",
+  rule_2_pullback_ge_3pct: "2. Pullback \u2265 3% from high",
+  rule_3_pullback_le_15pct: "3. Pullback \u2264 15% (not breakdown)",
   rule_4_new_10d_closing_high: "4. New 10d closing high",
   rule_5_breakout_ge_5pct: "5. Breakout \u2265 5%",
   rule_6_breakout_le_20pct: "6. Breakout \u2264 20%",
@@ -192,7 +192,7 @@ function buildHead() {
   RULE_COLS.forEach((col, i) => {
     html += `<th title="${RULE_LABELS[col] || col}">${i + 1}</th>`;
   });
-  html += '<th>Score</th><th class="num-col">ROE%</th><th class="num-col">ROCE%</th><th class="num-col">OpMgn%</th><th class="num-col">ATR%</th><th class="num-col">Stop -10%</th><th class="num-col">SMA10 Exit</th>';
+  html += '<th>Score</th><th class="num-col">Pullback%</th><th class="num-col">ROE%</th><th class="num-col">ROCE%</th><th class="num-col">OpMgn%</th><th class="num-col">ATR%</th><th class="num-col">Stop -10%</th><th class="num-col">SMA10 Exit</th>';
   headRow.innerHTML = html;
 }
 
@@ -207,6 +207,7 @@ function rowHtml(row) {
   const total = RULE_COLS.length;
   const scoreCls = score === total ? 'full' : (score >= total - 3 ? 'near' : '');
   html += `<td class="score ${scoreCls}">${score}/${total}</td>`;
+  html += `<td class="num">${fmt(row.pullback_pct, '%')}</td>`;
   html += `<td class="num">${fmt(row.roe_pct)}</td><td class="num">${fmt(row.roce_pct)}</td>`;
   html += `<td class="num">${fmt(row.operating_margin_pct)}</td><td class="num">${fmt(row.atr_pct_of_close)}</td>`;
   html += `<td class="num">${fmt(row.stop_loss_10pct)}</td>`;
