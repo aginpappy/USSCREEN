@@ -97,7 +97,7 @@ DGX,False,232.63,True,True,True,False,False,True,False,False,True,False,True,4.0
 DIS,False,108.49,True,False,True,True,False,True,False,True,True,False,True,0.7,1.91,97.64,104.98,False,True,True,True,True,True,11.3,10.3,22.0
 DLTR,False,117.61,False,False,True,False,False,True,True,True,True,False,True,2.7,3.07,105.85,115.45,False,True,True,True,True,True,37.4,15.4,14.1
 DOV,False,190.88,False,False,True,False,False,True,False,True,False,False,True,3.0,2.0,171.79,189.46,False,True,True,True,True,True,14.2,12.3,22.7
-DPZ,False,310.9,False,False,True,True,False,True,False,True,True,True,True,1.4,2.76,279.81,302.62,False,False,True,True,True,True,-15.1,81.2,19.4
+DPZ,False,310.9,False,False,True,True,False,True,False,True,True,True,True,1.4,2.76,279.81,302.62,False,False,False,True,True,True,-15.2,-843.6,20.4
 DRI,False,199.61,False,True,True,False,False,True,True,True,True,False,True,3.9,2.46,179.65,198.82,False,True,True,True,True,False,58.3,15.8,10.0
 DTE,False,128.05,False,False,True,False,False,True,True,True,True,False,True,1.7,1.65,115.25,125.45,False,True,False,True,True,True,11.9,4.7,11.0
 DUK,False,117.69,False,False,True,True,False,True,True,True,True,False,True,0.5,1.29,105.92,115.23,False,False,False,True,True,True,9.1,4.9,49.1
@@ -164,7 +164,7 @@ HPQ,False,29.87,True,True,True,False,False,True,False,False,True,False,True,11.2
 HRL,False,19.3,False,True,True,False,False,True,True,True,True,False,True,6.5,2.19,17.37,19.74,True,False,False,True,True,False,6.1,6.3,3.7
 HSIC,False,84.23,False,True,True,False,False,True,False,False,True,False,True,3.3,2.37,75.81,84.44,True,True,False,True,True,False,12.6,8.3,5.2
 HSY,False,163.84,False,True,True,True,False,True,True,True,True,False,True,3.7,1.98,147.46,160.98,False,True,True,True,True,True,19.0,13.6,36.4
-HUBB,False,474.11,False,True,True,False,False,True,False,True,False,False,True,4.4,2.71,426.7,471.19,False,True,True,True,True,True,23.5,18.2,17.4
+HUBB,False,474.05,False,True,True,False,False,True,False,True,False,False,True,5.0,2.65,426.64,472.02,False,True,True,True,True,True,23.5,18.2,17.4
 HUM,False,433.5,True,True,True,True,False,True,False,True,True,False,True,7.3,4.23,390.15,399.38,False,False,False,True,True,False,6.4,8.0,4.4
 HWM,False,220.81,False,True,True,False,False,True,True,True,True,False,True,5.4,3.01,198.73,226.93,True,True,True,True,True,True,26.3,18.7,20.0
 ICE,False,157.42,True,False,True,True,False,True,True,True,True,False,True,0.4,2.01,141.68,153.3,False,True,False,True,True,True,11.2,9.2,89.4
@@ -269,7 +269,6 @@ PODD,False,139.81,False,False,True,True,False,True,True,True,True,True,True,1.7,
 POOL,False,158.71,False,True,True,False,False,True,False,True,True,False,True,3.9,2.85,142.84,159.46,True,True,True,True,True,False,35.9,21.1,7.3
 PPG,False,103.71,False,True,True,False,False,True,False,True,True,True,True,4.4,2.23,93.34,105.02,True,True,True,True,True,True,19.4,15.6,15.4
 PPL,False,34.34,False,False,True,True,False,True,True,True,True,False,True,0.5,1.48,30.91,33.43,False,False,False,True,True,True,8.5,5.1,26.9
-PSKY,False,9.16,False,True,False,False,False,True,False,False,True,False,True,15.8,6.41,8.24,9.5,True,False,False,True,True,False,-5.0,-0.3,6.9
 PTC,False,194.39,True,False,True,False,False,True,True,True,True,False,True,1.2,3.15,174.95,172.98,False,True,True,True,True,True,21.2,19.0,27.7
 PYPL,False,56.05,True,False,True,True,False,True,True,True,True,False,True,0.6,2.52,50.44,54.28,False,True,True,True,True,True,26.1,18.4,17.8
 QCOM,False,174.43,False,True,True,False,False,True,True,False,True,False,True,13.6,4.04,156.99,180.0,True,True,True,True,True,True,112.9,26.9,16.3
